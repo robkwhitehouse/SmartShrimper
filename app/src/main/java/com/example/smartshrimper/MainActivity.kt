@@ -10,6 +10,7 @@ import androidx.viewpager.widget.ViewPager
 import androidx.appcompat.app.AppCompatActivity
 import com.example.smartshrimper.ui.main.Gauge
 import com.example.smartshrimper.ui.main.SectionsPagerAdapter
+import kotlinx.coroutines.delay
 
 
 interface SendChannel<in E> {
@@ -23,8 +24,12 @@ interface ReceiveChannel<out E> {
 
 interface Channel<E> : SendChannel<E>, ReceiveChannel<E>
 
+val streamBuffer = RingBuffer(20)
+
+
 class MainActivity : AppCompatActivity() {
 //    private lateinit var binding: ActivityMainBinding
+    private lateinit var revCounter: Gauge
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,10 +51,17 @@ class MainActivity : AppCompatActivity() {
 
         }
 
+        revCounter = findViewById(R.id.revCounter)
+
     }
 
-    override fun onResume() {
+    override suspend fun onResume() {
         super.onResume()
+        while (true) {
+            revCounter.moveToValue(streamBuffer.readNext().toFloat())
+            delay(200L)
+        }
+
 
     }
 }
