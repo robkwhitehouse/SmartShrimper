@@ -1,5 +1,6 @@
 package com.example.smartshrimper.ui.main
 
+import android.bluetooth.BluetoothAdapter
 import android.os.Bundle
 import android.os.Handler
 import android.os.HandlerThread
@@ -11,6 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.smartshrimper.R
+import com.google.android.material.snackbar.Snackbar
 
 /**
  * A placeholder fragment containing a simple view.
@@ -39,8 +41,11 @@ class RevcounterFragment : Fragment() {
         thread.start()
         val handler: Handler = Handler(thread.getLooper())
         handler.postDelayed({ revCounter.moveToValue(300f) }, 2800)
+
+
         return root
     }
+
 
     companion object {
         /**

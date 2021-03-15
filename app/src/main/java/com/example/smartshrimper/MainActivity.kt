@@ -29,15 +29,12 @@ interface ReceiveChannel<out E> {
 interface Channel<E> : SendChannel<E>, ReceiveChannel<E>
 
 class MainActivity : AppCompatActivity() {
-//    private lateinit var binding: ActivityMainBinding
-    private lateinit var revCounter: Gauge
-    private val mBtAdapter = BluetoothAdapter.getDefaultAdapter()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-
+        val mBtAdapter = BluetoothAdapter.getDefaultAdapter()
         val sectionsPagerAdapter = SectionsPagerAdapter(this, supportFragmentManager)
         val viewPager: ViewPager = findViewById(R.id.view_pager)
         viewPager.adapter = sectionsPagerAdapter
@@ -50,7 +47,6 @@ class MainActivity : AppCompatActivity() {
                     .setAction("Action", null).show()
 
         }
-
         //Connect to Sensor controller over Bluetooth
 
         val pairedDevices = mBtAdapter.bondedDevices
@@ -58,14 +54,12 @@ class MainActivity : AppCompatActivity() {
         if (pairedDevices.size > 0) {
             for (mdevice in pairedDevices) {
                 if (mdevice.name == "Smart Shrimper") {
-                    val view : ViewGroup = findViewById(R.id.constraintLayout)
+                    val view : View = findViewById(R.id.title)
                     Snackbar.make(view,"Found paired Bluetooth device", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show()
                 }
             }
         }
-
-        revCounter = findViewById(R.id.revCounter)
 
     }
 
