@@ -1,16 +1,20 @@
 package com.example.smartshrimper
 
+
+import android.bluetooth.BluetoothAdapter
 import android.os.Bundle
-import android.os.Handler
-import android.os.HandlerThread
+import android.view.View
+import android.view.ViewGroup
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.viewpager.widget.ViewPager
+import com.example.smartshrimper.ui.main.Gauge
+import com.example.smartshrimper.ui.main.SectionsPagerAdapter
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
-import androidx.viewpager.widget.ViewPager
-import androidx.appcompat.app.AppCompatActivity
-import com.example.smartshrimper.ui.main.Gauge
-import com.example.smartshrimper.ui.main.SectionsPagerAdapter
 import kotlinx.coroutines.delay
+
 
 
 interface SendChannel<in E> {
@@ -24,20 +28,16 @@ interface ReceiveChannel<out E> {
 
 interface Channel<E> : SendChannel<E>, ReceiveChannel<E>
 
-val streamBuffer = RingBuffer(20)
-
-
 class MainActivity : AppCompatActivity() {
 //    private lateinit var binding: ActivityMainBinding
     private lateinit var revCounter: Gauge
-
+    private val mBtAdapter = BluetoothAdapter.getDefaultAdapter()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        binding = ActivityMainBinding.inflate(layoutInflater)
-//        setContentView(binding.root)
-
         setContentView(R.layout.activity_main)
+
+
         val sectionsPagerAdapter = SectionsPagerAdapter(this, supportFragmentManager)
         val viewPager: ViewPager = findViewById(R.id.view_pager)
         viewPager.adapter = sectionsPagerAdapter
@@ -51,17 +51,35 @@ class MainActivity : AppCompatActivity() {
 
         }
 
+        //Connect to Sensor controller over Bluetooth
+
+        val pairedDevices = mBtAdapter.bondedDevices
+
+        if (pairedDevices.size > 0) {
+            for (mdevice in pairedDevices) {
+                if (mdevice.name == "Smart Shrimper") {
+                    val view : ViewGroup = findViewById(R.id.constraintLayout)
+                    Snackbar.make(view,"Found paired Bluetooth device", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show()
+                }
+            }
+        }
+
         revCounter = findViewById(R.id.revCounter)
 
     }
 
-    override suspend fun onResume() {
+    override fun onResume() {
         super.onResume()
-        while (true) {
-            revCounter.moveToValue(streamBuffer.readNext().toFloat())
-            delay(200L)
-        }
 
-
+         suspend fun updateGauges() {
+             while (true) {
+ //
+     //
+         //
+             //                revCounter.moveToValue(streamBuffer.readNext().toFloat())
+                 delay(200L)
+             }
+         }
     }
 }
