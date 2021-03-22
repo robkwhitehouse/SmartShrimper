@@ -91,8 +91,8 @@ class MainActivity : AppCompatActivity() {
         if (controllerFound == true) {
 
             val btService = MyBluetoothService(mainThreadHandler,mBTdevice)
-            btService.ConnectThread()
-            btService.ConnectedThread(MyBluetoothService.mmSocket).run()
+            btService.ConnectThread().run()
+            btService.ConnectedThread().run()
         }
 
 
