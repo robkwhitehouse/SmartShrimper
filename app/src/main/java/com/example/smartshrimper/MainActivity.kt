@@ -8,6 +8,7 @@ import android.content.ContentValues.TAG
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.Message
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
@@ -32,7 +33,7 @@ var mBtAdapter : BluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
 //This is the default well-known UUID
 val mUUID  = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
 val mainThreadHandler: Handler = HandlerCompat.createAsync(Looper.getMainLooper())
-
+/*
 interface SendChannel<in E> {
     suspend fun send(element: E)
     fun close(): Boolean
@@ -43,12 +44,10 @@ interface ReceiveChannel<out E> {
 }
 
 interface Channel<E> : SendChannel<E>, ReceiveChannel<E>
-
+*/
 class MainActivity : AppCompatActivity() {
 
-
-
-    override fun onCreate(savedInstanceState: Bundle?) {
+        override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
@@ -89,13 +88,17 @@ class MainActivity : AppCompatActivity() {
             }
         }
         if (controllerFound == true) {
-
-            val btService = MyBluetoothService(mainThreadHandler,mBTdevice)
+            //Set up a handler to handle incoming Messages from the BT Thread
+            val myBThandler = object:  Handler(Looper.getMainLooper()) {
+                override fun handleMessage(msg: Message) {
+                    val mtext  = msg.toString()
+                    Snackbar.make(view, mtext, Snackbar.LENGTH_LONG).show()
+                }
+            }
+            //Create and run the Bluetooth Thread
+            val btService = MyBluetoothService(myBThandler,mBTdevice)
             btService.ConnectThread().run()
-            btService.ConnectedThread().run()
         }
-
-
     }
 
     override fun onResume() {
@@ -112,6 +115,3 @@ class MainActivity : AppCompatActivity() {
     }
 }
 
-fun manageMyConnectedSocket(socket: BluetoothSocket) {
-
-}

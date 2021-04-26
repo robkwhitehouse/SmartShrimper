@@ -8,7 +8,6 @@ import android.os.Handler
 import android.util.Log
 import com.example.smartshrimper.mBtAdapter
 import com.example.smartshrimper.mUUID
-import com.example.smartshrimper.manageMyConnectedSocket
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
@@ -22,55 +21,62 @@ const val MESSAGE_WRITE: Int = 1
 const val MESSAGE_TOAST: Int = 2
 // ... (Add other message types here as needed.)
 
-class MyBluetoothService(
-        // handler that gets info from Bluetooth service
-        private val handler: Handler, private val BtDevice: BluetoothDevice) {
-    lateinit var mmSocket: BluetoothSocket
+class MyBluetoothService(private val handler: Handler, private val BtDevice: BluetoothDevice) {
+ //   lateinit var btSocket: BluetoothSocket
+    public val btSocket: BluetoothSocket? by lazy(LazyThreadSafetyMode.NONE) {
+     BtDevice.createRfcommSocketToServiceRecord(mUUID)
+    }
+
     inner class ConnectThread() : Thread() {
 
-        public val mmSocket: BluetoothSocket? by lazy(LazyThreadSafetyMode.NONE) {
-            BtDevice.createRfcommSocketToServiceRecord(mUUID)
-        }
-
-        public override fun run() {
+         public override fun run() {
             // Cancel discovery because it otherwise slows down the connection.
-            mBtAdapter?.cancelDiscovery()
+            mBtAdapter.cancelDiscovery()
+            try {
+               btSocket?.use { socket ->
+                   // Connect to the remote device through the socket. This call blocks
+                   // until it succeeds or throws an exception.
+                   socket.connect()
 
-            mmSocket?.use { socket ->
-                // Connect to the remote device through the socket. This call blocks
-                // until it succeeds or throws an exception.
-                socket.connect()
+                   // The connection attempt succeeded. Perform work associated with
+                   // the connection in a separate thread.
+                   manageMyConnectedSocket(socket)
+               }
+             } catch (e: IOException) {
+                 Log.e(TAG, "Could not connect the Bluetooth socket", e)
+             }
 
-                // The connection attempt succeeded. Perform work associated with
-                // the connection in a separate thread.
-                manageMyConnectedSocket(socket)
-            }
-        }
+         }
 
         // Closes the client socket and causes the thread to finish.
         fun cancel() {
             try {
-                mmSocket?.close()
+                btSocket?.close()
             } catch (e: IOException) {
                 Log.e(ContentValues.TAG, "Could not close the client socket", e)
             }
         }
     }
 
+    fun manageMyConnectedSocket(btSocket: BluetoothSocket) {
+        ConnectedThread().run()
+        ConnectedThread().receive()
+    }
+
     inner class ConnectedThread() : Thread() {
 
-        private val mmInStream: InputStream = mmSocket.inputStream
-        private val mmOutStream: OutputStream = mmSocket.outputStream
+        private val mmInStream: InputStream? = btSocket?.inputStream
+        private val mmOutStream: OutputStream? = btSocket?.outputStream
         private val mmBuffer: ByteArray = ByteArray(1024) // mmBuffer store for the stream
 
-        override fun run() {
+        fun receive() {
             var numBytes: Int // bytes returned from read()
 
             // Keep listening to the InputStream until an exception occurs.
             while (true) {
                 // Read from the InputStream.
                 numBytes = try {
-                    mmInStream.read(mmBuffer)
+                    mmInStream!!.read(mmBuffer)
                 } catch (e: IOException) {
                     Log.d(TAG, "Input stream was disconnected", e)
                     break
@@ -87,7 +93,7 @@ class MyBluetoothService(
         // Call this from the main activity to send data to the remote device.
         fun write(bytes: ByteArray) {
             try {
-                mmOutStream.write(bytes)
+                mmOutStream!!.write(bytes)
             } catch (e: IOException) {
                 Log.e(TAG, "Error occurred when sending data", e)
 
@@ -110,7 +116,7 @@ class MyBluetoothService(
         // Call this method from the main activity to shut down the connection.
         fun cancel() {
             try {
-                mmSocket.close()
+                btSocket?.close()
             } catch (e: IOException) {
                 Log.e(TAG, "Could not close the connect socket", e)
             }
