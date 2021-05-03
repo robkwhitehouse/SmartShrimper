@@ -17,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.HandlerCompat
 import androidx.viewpager.widget.ViewPager
 import com.example.smartshrimper.ui.main.Gauge
+import com.example.smartshrimper.ui.main.MESSAGE_TOAST
 import com.example.smartshrimper.ui.main.MyBluetoothService
 import com.example.smartshrimper.ui.main.SectionsPagerAdapter
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -31,7 +32,7 @@ lateinit var mBTdevice : BluetoothDevice
 lateinit var mBTSocket : BluetoothSocket
 var mBtAdapter : BluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
 //This is the default well-known UUID
-val mUUID  = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
+val mUUID: UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
 val mainThreadHandler: Handler = HandlerCompat.createAsync(Looper.getMainLooper())
 /*
 interface SendChannel<in E> {
@@ -93,6 +94,7 @@ class MainActivity : AppCompatActivity() {
                 override fun handleMessage(msg: Message) {
                     val mtext  = msg.toString()
                     Snackbar.make(view, mtext, Snackbar.LENGTH_LONG).show()
+ //                   if (msg.what == MESSAGE_TOAST) finishAffinity()
                 }
             }
             //Create and run the Bluetooth Thread
