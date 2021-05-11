@@ -10,6 +10,7 @@ import com.example.smartshrimper.R
 import com.example.smartshrimper.mBtAdapter
 import com.example.smartshrimper.mUUID
 import com.google.android.material.snackbar.Snackbar
+import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
@@ -18,10 +19,8 @@ private const val TAG = "SMART_SHRIMPER_DEBUG"
 
 // Defines several constants used when transmitting messages between the
 // service and the UI.
-const val MESSAGE_READ: Int = 0
-const val MESSAGE_WRITE: Int = 1
-const val MESSAGE_TOAST: Int = 2
-// ... (Add other message types here as needed.)
+enum class BT_MSG {READ, WRITE, TOAST}
+
 
 class MyBluetoothService(private val handler: Handler, private val BtDevice: BluetoothDevice) {
 
@@ -31,7 +30,8 @@ class MyBluetoothService(private val handler: Handler, private val BtDevice: Blu
 
     private val mmInStream: InputStream? = btSocket?.inputStream
     private val mmOutStream: OutputStream? = btSocket?.outputStream
-    private val mmBuffer: ByteArray = ByteArray(1024) // mmBuffer store for the stream
+    private val mmBuffer: ByteArray = ByteArray(1024) // Buffer for Thread/Handler messages
+    private val mmReader = mmInStream?.bufferedReader()
 
 
     inner class ConnectThread() : Thread() {
@@ -50,7 +50,7 @@ class MyBluetoothService(private val handler: Handler, private val BtDevice: Blu
                 val errortext = "Could not connect to the controller"
                 Log.e(TAG, errortext, e)
                 val msg = handler.obtainMessage(
-                    MESSAGE_TOAST, -1, -1,
+                    BT_MSG.TOAST.ordinal, -1, -1,
                     errortext)
                     msg.sendToTarget()
                     cancel()
@@ -74,9 +74,12 @@ class MyBluetoothService(private val handler: Handler, private val BtDevice: Blu
 
             // Keep listening to the InputStream until an exception occurs.
             while (true) {
-                // Read from the InputStream.
-                numBytes = try {
-                    mmInStream!!.read(mmBuffer)
+                // Read a line from the InputStream.
+                try {
+                    var i: Int = 0
+                    mmReader?.readLine()?.forEach{
+                        mmBuffer.set(i++,it.toByte())
+                    }
                 } catch (e: IOException) {
                     Log.d(TAG, "Input stream was disconnected", e)
                     break
@@ -84,7 +87,7 @@ class MyBluetoothService(private val handler: Handler, private val BtDevice: Blu
 
                 // Send the obtained bytes to the UI activity.
                 val readMsg = handler.obtainMessage(
-                    MESSAGE_READ, numBytes, -1,
+                    BT_MSG.READ.ordinal, mmBuffer.lastIndex, -1,
                     mmBuffer)
                 readMsg.sendToTarget()
             }
@@ -98,7 +101,7 @@ class MyBluetoothService(private val handler: Handler, private val BtDevice: Blu
                 Log.e(TAG, "Error occurred when sending data", e)
 
                 // Send a failure message back to the activity.
-                val writeErrorMsg = handler.obtainMessage(MESSAGE_TOAST)
+                val writeErrorMsg = handler.obtainMessage(BT_MSG.TOAST.ordinal)
                 val bundle = Bundle().apply {
                     putString("toast", "Couldn't send data to the other device")
                 }
@@ -109,7 +112,7 @@ class MyBluetoothService(private val handler: Handler, private val BtDevice: Blu
 
             // Share the sent message with the UI activity.
             val writtenMsg = handler.obtainMessage(
-                MESSAGE_WRITE, -1, -1, bytes)
+                BT_MSG.WRITE.ordinal, -1, -1, bytes)
             writtenMsg.sendToTarget()
         }
     }

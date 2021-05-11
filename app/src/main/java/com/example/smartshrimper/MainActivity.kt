@@ -16,10 +16,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.HandlerCompat
 import androidx.viewpager.widget.ViewPager
-import com.example.smartshrimper.ui.main.Gauge
-import com.example.smartshrimper.ui.main.MESSAGE_TOAST
-import com.example.smartshrimper.ui.main.MyBluetoothService
-import com.example.smartshrimper.ui.main.SectionsPagerAdapter
+import com.example.smartshrimper.ui.main.*
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
@@ -93,13 +90,15 @@ class MainActivity : AppCompatActivity() {
             val myBThandler = object:  Handler(Looper.getMainLooper()) {
                 override fun handleMessage(msg: Message) {
                     val mtext  = msg.toString()
-                    Snackbar.make(view, mtext, Snackbar.LENGTH_LONG).show()
- //                   if (msg.what == MESSAGE_TOAST) finishAffinity()
+
+                    if (msg.what == BT_MSG.TOAST.ordinal) {Snackbar.make(view,"Could not connect to controller", 6000).show()}
+                    else Snackbar.make(view, mtext, Snackbar.LENGTH_LONG).show()
                 }
             }
             //Create and run the Bluetooth Thread
             val btService = MyBluetoothService(myBThandler,mBTdevice)
             btService.ConnectThread().run()
+            Snackbar.make(view,"Connecting to the controller", Snackbar.LENGTH_LONG).show()
         }
     }
 
