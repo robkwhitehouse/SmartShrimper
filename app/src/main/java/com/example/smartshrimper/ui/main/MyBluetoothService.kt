@@ -6,13 +6,9 @@ import android.content.ContentValues
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
-import com.example.smartshrimper.R
 import com.example.smartshrimper.mBtAdapter
 import com.example.smartshrimper.mUUID
-import com.google.android.material.snackbar.Snackbar
-import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
+import java.io.*
 
 private const val TAG = "SMART_SHRIMPER_DEBUG"
 
@@ -32,6 +28,7 @@ class MyBluetoothService(private val handler: Handler, private val BtDevice: Blu
     private val mmInStream: InputStream? = btSocket?.inputStream
     private val mmOutStream: OutputStream? = btSocket?.outputStream
     private val mmBuffer: ByteArray = ByteArray(1024) // mmBuffer store for the stream
+    private val mmReader: BufferedReader = BufferedReader(InputStreamReader(mmInStream))
 
 
     inner class ConnectThread() : Thread() {
@@ -76,7 +73,7 @@ class MyBluetoothService(private val handler: Handler, private val BtDevice: Blu
             while (true) {
                 // Read from the InputStream.
                 numBytes = try {
-                    mmInStream!!.read(mmBuffer)
+                    mmReader!!.readLine(mmBuffer)
                 } catch (e: IOException) {
                     Log.d(TAG, "Input stream was disconnected", e)
                     break

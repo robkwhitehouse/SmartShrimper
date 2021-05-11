@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "SmartShrimperData",
+  "description":  "Data Packet from the Smart Shrimper microcontroller",
+  "type": "object",
+
+  "properties": {
+
+    "RPM": {
+      "description": "Engine Revs Per Minute",
+      "type": "integer"
+    },
+
+    "Voltage": {
+      "description": "Battery Voltage",
+      "type": "float"
+    },
+
+    "Coolbox Status": {
+      "description": "Coolbox electricty supply relay status",
+      "type": "boolean"
+     }
+  },
+
+  "required": ["id", "name", "price"]
+}
