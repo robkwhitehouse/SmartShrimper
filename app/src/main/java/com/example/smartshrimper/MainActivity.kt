@@ -23,6 +23,8 @@ import com.google.android.material.tabs.TabLayout
 import kotlinx.coroutines.delay
 import java.io.IOException
 import java.util.*
+import org.json.JSONException
+import org.json.JSONObject
 
 var controllerFound = false
 lateinit var mBTdevice : BluetoothDevice
@@ -45,6 +47,9 @@ interface Channel<E> : SendChannel<E>, ReceiveChannel<E>
 */
 class MainActivity : AppCompatActivity() {
 
+        var rpm: Float = 0F
+        lateinit var revCounter: Gauge
+
         override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -56,6 +61,7 @@ class MainActivity : AppCompatActivity() {
         val tabs: TabLayout = findViewById(R.id.tabs)
         tabs.setupWithViewPager(viewPager)
         val fab: FloatingActionButton = findViewById(R.id.fab)
+        revCounter = findViewById(R.id.revCounter)
 
         fab.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
@@ -63,7 +69,8 @@ class MainActivity : AppCompatActivity() {
 
         }
         val view : View = findViewById(R.id.title)
-        //Connect to Sensor controller over Bluetooth
+
+            //Connect to Sensor controller over Bluetooth
 
         //1. Check the BT is turned on
         if(!mBtAdapter.isEnabled()) {
@@ -92,27 +99,32 @@ class MainActivity : AppCompatActivity() {
                     val mtext  = msg.toString()
 
                     if (msg.what == BT_MSG.TOAST.ordinal) {Snackbar.make(view,"Could not connect to controller", 6000).show()}
-                    else Snackbar.make(view, mtext, Snackbar.LENGTH_LONG).show()
+                    else {
+                        // get JSONObject from the message
+                        val obj = JSONObject(msg.data.getByteArray("ShrimperData").toString())
+                        // fetch JSONObject named RPM
+                        rpm = obj.getString("RPM").toFloat()
+                    }
                 }
             }
             //Create and run the Bluetooth Thread
             val btService = MyBluetoothService(myBThandler,mBTdevice)
-            btService.ConnectThread().run()
+            btService.ConnectThread().start()
             Snackbar.make(view,"Connecting to the controller", Snackbar.LENGTH_LONG).show()
         }
     }
 
     override fun onResume() {
         super.onResume()
+        updateGauges()
+    }
 
-         suspend fun updateGauges() {
+    fun updateGauges() {
 
-             while (true) {
+        while (true) {
 
-             //  revCounter.moveToValue(streamBuffer.readNext().toFloat())
-                 delay(200L)
-             }
-         }
+            revCounter.moveToValue(rpm)
+        }
     }
 }
 
