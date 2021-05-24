@@ -1,30 +1,19 @@
 package com.example.smartshrimper
 
 
+import android.R
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
-import android.content.ContentValues.TAG
-import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.os.Message
-import android.util.Log
+import android.os.*
 import android.view.View
-import android.view.ViewGroup
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.HandlerCompat
-import androidx.viewpager.widget.ViewPager
 import com.example.smartshrimper.ui.main.*
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.tabs.TabLayout
-import kotlinx.coroutines.delay
-import java.io.IOException
-import java.util.*
-import org.json.JSONException
 import org.json.JSONObject
+import java.util.*
+
 
 var controllerFound = false
 lateinit var mBTdevice : BluetoothDevice
@@ -33,44 +22,28 @@ var mBtAdapter : BluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
 //This is the default well-known UUID
 val mUUID: UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
 val mainThreadHandler: Handler = HandlerCompat.createAsync(Looper.getMainLooper())
-/*
-interface SendChannel<in E> {
-    suspend fun send(element: E)
-    fun close(): Boolean
+
+class ShrimperData {
+    var rpm = 0f
+    var batteryVoltage = 0f
+    var relayStatus = false
 }
 
-interface ReceiveChannel<out E> {
-    suspend fun receive(): E
-}
-
-interface Channel<E> : SendChannel<E>, ReceiveChannel<E>
-*/
 class MainActivity : AppCompatActivity() {
-
-        var rpm: Float = 0F
-        lateinit var revCounter: Gauge
-
-        override fun onCreate(savedInstanceState: Bundle?) {
+    val shrimperData = ShrimperData()
+    val gaugeThread = HandlerThread("GaugeDemoThread")
+    lateinit var gaugeHandler: Handler
+    lateinit var revCounter: Gauge
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        revCounter = findViewById(com.example.smartshrimper.R.id.revCounter)
+        gaugeThread.start()
+        gaugeHandler = Handler(gaugeThread.getLooper())
 
+         val view : View = findViewById(R.id.title)
 
-        val sectionsPagerAdapter = SectionsPagerAdapter(this, supportFragmentManager)
-        val viewPager: ViewPager = findViewById(R.id.view_pager)
-        viewPager.adapter = sectionsPagerAdapter
-        val tabs: TabLayout = findViewById(R.id.tabs)
-        tabs.setupWithViewPager(viewPager)
-        val fab: FloatingActionButton = findViewById(R.id.fab)
-        revCounter = findViewById(R.id.revCounter)
-
-        fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show()
-
-        }
-        val view : View = findViewById(R.id.title)
-
-            //Connect to Sensor controller over Bluetooth
+        //Connect to the ESP-32 sensor controller over Bluetooth
 
         //1. Check the BT is turned on
         if(!mBtAdapter.isEnabled()) {
@@ -103,7 +76,9 @@ class MainActivity : AppCompatActivity() {
                         // get JSONObject from the message
                         val obj = JSONObject(msg.data.getByteArray("ShrimperData").toString())
                         // fetch JSONObject named RPM
-                        rpm = obj.getString("RPM").toFloat()
+                        shrimperData.rpm = obj.getString("RPM").toFloat()
+                        shrimperData.batteryVoltage = obj.getString("Battery Voltage").toFloat()
+                        shrimperData.relayStatus = obj.getString("Relay Status").toBoolean()
                     }
                 }
             }
@@ -122,8 +97,7 @@ class MainActivity : AppCompatActivity() {
     fun updateGauges() {
 
         while (true) {
-
-            revCounter.moveToValue(rpm)
+            gaugeHandler.post(revCounter.moveToValue(shrimperData.rpm))
         }
     }
 }
