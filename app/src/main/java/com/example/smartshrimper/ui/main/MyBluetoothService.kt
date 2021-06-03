@@ -70,7 +70,7 @@ class MyBluetoothService(private val handler: Handler, private val BtDevice: Blu
 
 
         fun receive() {
-            var numBytes: Int // bytes returned from read()
+
             val msgBundle: Bundle = Bundle()
             // Keep listening to the InputStream until an exception occurs.
             while (true) {
@@ -87,9 +87,12 @@ class MyBluetoothService(private val handler: Handler, private val BtDevice: Blu
 
                 // Send the obtained bytes to the UI activity.
 
-                msgBundle.putByteArray("ShrimperData",mmBuffer)
+ //               msgBundle.putByteArray(null,mmBuffer)
                 val readMsg = handler.obtainMessage(
-                    BT_MSG.READ.ordinal, mmBuffer.lastIndex, -1, msgBundle)
+                    BT_MSG.READ.ordinal, mmBuffer.lastIndex, -1)
+                val mmBundle = Bundle()
+                    mmBundle.putByteArray(null,mmBuffer)
+                readMsg.data = mmBundle
                 readMsg.sendToTarget()
             }
         }

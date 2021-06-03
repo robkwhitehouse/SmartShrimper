@@ -7,4 +7,5 @@
     <string name="invalid_min_max">Sum of min (%1$f) and max (%2$f) should be a multiple of value per nick (%3$f). Scale may be distorted.</string>
     <string name="scale_ok">Scale should be okay.</string>
     <string name="per_minute">RPM</string>
+    <string name="voltmeter">Battery Volts</string>
 </resources>

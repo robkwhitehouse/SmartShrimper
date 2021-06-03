@@ -9,48 +9,60 @@
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="@style/Theme.MyTabbedApplication.AppBarOverlay">
-
-        <TextView
-            android:id="@+id/title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:minHeight="?actionBarSize"
-            android:padding="@dimen/appbar_padding"
-            android:text="@string/app_name"
-            android:textAppearance="@style/TextAppearance.Widget.AppCompat.Toolbar.Title" />
-
-   </com.google.android.material.appbar.AppBarLayout>
+        android:theme="@style/Theme.MyTabbedApplication.AppBarOverlay"/>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
-        xmlns:gauge="http://schemas.android.com/apk/res-auto"
         android:id="@+id/constraintLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.example.smartshrimper.ui.main.Gauge
-            android:id="@+id/revCounter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="10dp"
-            android:layout_weight="0.75"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/constraintLayout"
-            gauge:labelTextSize="42"
-            gauge:lowerText="@string/per_minute"
-            gauge:maxValue="4000"
-            gauge:minValue="0"
-            gauge:totalNicks="200"
-            gauge:upperText=""
-            gauge:valuePerNick="25"
-            gauge:majorNickInterval="10"
-            tools:layout_constraintLeft_creator="1"
-            tools:layout_constraintTop_creator="1" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <com.example.smartshrimper.ui.main.Gauge
+                android:id="@+id/revCounter"
+                android:layout_width="312dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="60dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginRight="16dp"
+                android:layout_weight="0.75"
+                app:labelTextSize="42"
+                app:lowerText="@string/per_minute"
+                app:majorNickInterval="10"
+                app:maxValue="4000"
+                app:minValue="0"
+                app:totalNicks="200"
+                app:upperText=""
+                app:valuePerNick="25"
+                tools:layout_constraintLeft_creator="1"
+                tools:layout_constraintTop_creator="1" />
+
+            <com.example.smartshrimper.ui.main.Gauge
+                android:id="@+id/voltmeter"
+                android:layout_width="303dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginLeft="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginRight="16dp"
+                android:layout_weight="0.75"
+                app:labelTextSize="42"
+                app:lowerText="@string/voltmeter"
+                app:majorNickInterval="10"
+                app:maxValue="15"
+                app:minValue="11"
+                app:totalNicks="50"
+                app:upperText=""
+                app:valuePerNick="0.1"
+                tools:layout_constraintLeft_creator="1"
+                tools:layout_constraintTop_creator="1" />
+        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

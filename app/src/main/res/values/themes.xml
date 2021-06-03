@@ -13,12 +13,12 @@
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
     </style>
-
+<!--
     <style name="Theme.MyTabbedApplication.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
-
+!-->
     <style name="Theme.MyTabbedApplication.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="Theme.MyTabbedApplication.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
