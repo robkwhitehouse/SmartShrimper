@@ -451,7 +451,9 @@ class Gauge : View {
      * @param value Value
      */
     fun setValue(value: Float) {
-        this.value = value
+        if (value < minValue) this.value = minValue
+        else if (value > maxValue) this.value = maxValue
+        else  this.value = value
         needleValue = this.value
         postInvalidate()
     }
